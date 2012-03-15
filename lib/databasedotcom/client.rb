@@ -546,11 +546,10 @@ module Databasedotcom
     
     def common_headers(*additional_headers)
       base_headers = {"Authorization" => "OAuth #{self.oauth_token}", "Accept-Encoding" => "gzip"}  #
-      additional_headers.each{|h| base_headers.merge(h)} if additional_headers
-      puts "Headers #{base_headers.inspect}"
+      additional_headers.each{|h| base_headers.merge!(h)} if additional_headers
       base_headers
     end
-    
+
     def decompress(result)
       if result['content-encoding'] == 'gzip'
         begin

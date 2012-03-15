@@ -1043,13 +1043,19 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:get, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 200)
+        @client.http_get("/my/path")
+        WebMock.should have_requested(:get, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
           @client.http_get("/my/path", nil, {"Something" => "Header"})
         }.should raise_error(Databasedotcom::SalesForceError)
       end
-
+      
       it_should_behave_like "a request that can refresh the oauth token", :get, "get", "https://na1.salesforce.com/my/path", 200
     end
 
@@ -1070,6 +1076,12 @@ describe Databasedotcom::Client do
         stub_request(:delete, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 204)
         @client.http_delete("/my/path", {}, {"Something" => "Header"})
         WebMock.should have_requested(:delete, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
+      end
+
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:delete, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 204)
+        @client.http_delete("/my/path")
+        WebMock.should have_requested(:delete, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
       end
 
       it "raises SalesForceError" do
@@ -1101,6 +1113,12 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 201)
+        @client.http_post("/my/path")
+        WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
@@ -1130,6 +1148,12 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 201)
+        @client.http_multipart_post("/my/path", {}, {}, {"Something" => "Header"})
+        WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
@@ -1157,6 +1181,12 @@ describe Databasedotcom::Client do
         stub_request(:patch, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 201)
         @client.http_patch("/my/path", "data", nil, {"Something" => "Header"})
         WebMock.should have_requested(:patch, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
+      end
+
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:patch, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 201)
+        @client.http_patch("/my/path", "data", nil, {"Something" => "Header"})
+        WebMock.should have_requested(:patch, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
       end
 
       it "raises SalesForceError" do
