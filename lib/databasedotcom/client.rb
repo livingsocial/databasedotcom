@@ -545,11 +545,8 @@ module Databasedotcom
     end
     
     def common_headers(*additional_headers)
-      base_headers = {"Authorization" => "OAuth #{self.oauth_token}", "Accept-Encoding" => "gzip"}
-      if additional_headers
-        base_headers.merge(additional_headers) if additional_headers.is_a? Hash
-        additional_headers.each{|h| base_headers.merge(h)} if additional_headers.is_a? Array
-      end
+      base_headers = {"Authorization" => "OAuth #{self.oauth_token}", "Accept-Encoding" => "gzip"}  #
+      additional_headers.each{|h| base_headers.merge(h)} if additional_headers
       puts "Headers #{base_headers.inspect}"
       base_headers
     end
