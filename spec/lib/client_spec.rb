@@ -1024,7 +1024,7 @@ describe Databasedotcom::Client do
       end
     end
 
-    i = Zlib::GzipReader.new(StringIO.new(result.body))
+    #i = Zlib::GzipReader.new(StringIO.new(result.body))
 
     describe "#http_get" do
       it "gets the requested path" do
@@ -1034,15 +1034,23 @@ describe Databasedotcom::Client do
       end
 
       it "returns an unencrypted body" do
-        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "test body", :status => 200)
+        body = "test body"
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => body, :status => 200)
         result = @client.http_get("/my/path")
-        result.body.should_be 'test_body'
+        result.body.should == body
       end
 
       it "decompresses an encrypted body" do
-        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 200)
-        @client.http_get("/my/path")
-        WebMock.should have_requested(:get, "https://na1.salesforce.com/my/path")
+        require 'zlib'
+        body = "test body"
+        s = StringIO.new
+        gz = Zlib::GzipWriter.new(s)
+        gz.write(body)
+        gz.close
+        gz_body = s.string
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => gz_body, :status => 200, :headers => {"Content-Encoding" => 'gzip'})
+        result = @client.http_get("/my/path")
+        result.body.should == body
       end
 
       it "puts parameters into the path" do
