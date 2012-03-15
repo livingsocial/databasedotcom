@@ -1024,8 +1024,22 @@ describe Databasedotcom::Client do
       end
     end
 
+    i = Zlib::GzipReader.new(StringIO.new(result.body))
+
     describe "#http_get" do
       it "gets the requested path" do
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 200)
+        @client.http_get("/my/path")
+        WebMock.should have_requested(:get, "https://na1.salesforce.com/my/path")
+      end
+
+      it "returns an unencrypted body" do
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "test body", :status => 200)
+        result = @client.http_get("/my/path")
+        result.body.should_be 'test_body'
+      end
+
+      it "decompresses an encrypted body" do
         stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 200)
         @client.http_get("/my/path")
         WebMock.should have_requested(:get, "https://na1.salesforce.com/my/path")
