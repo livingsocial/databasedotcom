@@ -556,7 +556,7 @@ module Databasedotcom
           original_size = result.body.length
           i = Zlib::GzipReader.new(StringIO.new(result.body))
           result.instance_variable_set(:@body, i.read)
-          puts "Result body was compressed #{100.0*(result.body.length - original_size)/result.body.length}%"
+          #puts "Result body was compressed #{100.0*(result.body.length - original_size)/result.body.length}%"
         rescue Zlib::GzipFile::Error
          end
       end
