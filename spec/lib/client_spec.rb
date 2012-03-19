@@ -1051,6 +1051,17 @@ describe Databasedotcom::Client do
       end
 
       it_should_behave_like "a request that can refresh the oauth token", :get, "get", "https://na1.salesforce.com/my/path", 200
+
+      it "handles paths !> MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH-1]
+        stub_request(:get, "https://na1.salesforce.com#{path}").to_return(:body => '', :status => 200)
+        @client.http_get(path, nil, {})
+      end
+
+      it "raises MaxPathLengthError for paths > MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
+        lambda { @client.http_get(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
+      end
     end
 
     describe "#http_delete" do
@@ -1080,6 +1091,17 @@ describe Databasedotcom::Client do
       end
 
       it_should_behave_like "a request that can refresh the oauth token", :delete, "delete", "https://na1.salesforce.com/my/path", 204
+      
+      it "handles paths !> MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH-1]
+        stub_request(:delete, "https://na1.salesforce.com#{path}").to_return(:body => '', :status => 204)
+        @client.http_delete(path, nil, {})
+      end
+
+      it "raises MaxPathLengthError for paths > MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
+        lambda { @client.http_delete(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
+      end
     end
 
     describe "#http_post" do
@@ -1109,6 +1131,18 @@ describe Databasedotcom::Client do
       end
 
       it_should_behave_like "a request that can refresh the oauth token", :post, "post", "https://na1.salesforce.com/my/path", 201
+
+      it "handles paths !> MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH-1]
+        stub_request(:post, "https://na1.salesforce.com#{path}").to_return(:body => '', :status => 204)
+        @client.http_post(path, nil, {})
+      end
+
+      it "raises MaxPathLengthError for paths > MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
+        lambda { @client.http_post(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
+      end
+
     end
 
     describe "#http_multipart_post" do
@@ -1138,6 +1172,17 @@ describe Databasedotcom::Client do
       end
 
       it_should_behave_like "a request that can refresh the oauth token", :post, "multipart_post", "https://na1.salesforce.com/my/path", 201
+
+      it "raises MaxPathLengthError for paths > MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
+        lambda { @client.http_multipart_post(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
+      end
+
+      it "handles paths !> MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH-1]
+        stub_request(:post, "https://na1.salesforce.com#{path}").to_return(:body => '', :status => 201)
+        @client.http_multipart_post(path, {}, {}, {"Something" => "Header"})
+      end
     end
 
     describe "#http_patch" do
@@ -1165,6 +1210,18 @@ describe Databasedotcom::Client do
           @client.http_patch("/my/path", "data", nil, {"Something" => "Header"})
         }.should raise_error(Databasedotcom::SalesForceError)
       end
+         
+      it "raises MaxPathLengthError for paths > MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
+        lambda { @client.http_patch(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
+      end
+
+      it "handles paths !> MAX_PATH_LENGTH" do
+        path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH-1]
+        stub_request(:patch, "https://na1.salesforce.com#{path}").to_return(:body => '', :status => 201)
+        @client.http_patch(path, nil, {})
+      end
+
     end
   end
 end

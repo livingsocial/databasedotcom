@@ -3,6 +3,9 @@ require 'json'
 require 'net/http/post/multipart'
 require 'date'
 
+# A URL greater than 8192 will not be accepted by Salesforce
+MAX_PATH_LENGTH = 8192
+
 module Databasedotcom
   # Interface for operating the Force.com REST API
   class Client
@@ -386,9 +389,14 @@ module Databasedotcom
         http.verify_mode = self.verify_mode if self.verify_mode
       end
     end
-
+    
     def encode_path_with_params(path, parameters={})
-      [URI.escape(path), encode_parameters(parameters)].reject{|el| el.empty?}.join('?')
+      check_path_length([URI.escape(path), encode_parameters(parameters)].reject{|el| el.empty?}.join('?'))
+    end
+
+    def check_path_length(path) # SF won't accept URL paths > 8192 chars, this is a HTTP default limitation
+      raise Databasedotcom::MaxPathLengthError.new(path) if path.length > MAX_PATH_LENGTH
+      path
     end
 
     def encode_parameters(parameters={})
