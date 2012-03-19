@@ -289,7 +289,7 @@ module Databasedotcom
     # HTTPSuccess- raises SalesForceError otherwise.
     def http_get(path, parameters={}, headers={})
       with_encoded_path_and_checked_response(path, parameters) do |encoded_path|
-        https_request.get(encoded_path, {"Authorization" => "OAuth #{self.oauth_token}"}.merge(headers))
+        https_request.get(encoded_path, common_headers.merge(headers))
       end
     end
 
@@ -299,7 +299,7 @@ module Databasedotcom
     # HTTPSuccess- raises SalesForceError otherwise.
     def http_delete(path, parameters={}, headers={})
       with_encoded_path_and_checked_response(path, parameters, {:expected_result_class => Net::HTTPNoContent}) do |encoded_path|
-        https_request.delete(encoded_path, {"Authorization" => "OAuth #{self.oauth_token}"}.merge(headers))
+        https_request.delete(encoded_path, common_headers(headers))
       end
     end
 
@@ -308,7 +308,7 @@ module Databasedotcom
     # headers specified in _headers_.  Returns the HTTPResult if it is of type HTTPSuccess- raises SalesForceError otherwise.
     def http_post(path, data=nil, parameters={}, headers={})
       with_encoded_path_and_checked_response(path, parameters, {:data => data}) do |encoded_path|
-        https_request.post(encoded_path, data, {"Content-Type" => data ? "application/json" : "text/plain", "Authorization" => "OAuth #{self.oauth_token}"}.merge(headers))
+        https_request.post(encoded_path, data, common_headers(headers,{"Content-Type" => data ? "application/json" : "text/plain"}))
       end
     end
 
@@ -317,7 +317,7 @@ module Databasedotcom
     # headers specified in _headers_.  Returns the HTTPResult if it is of type HTTPSuccess- raises SalesForceError otherwise.
     def http_patch(path, data=nil, parameters={}, headers={})
       with_encoded_path_and_checked_response(path, parameters, {:data => data}) do |encoded_path|
-        https_request.send_request("PATCH", encoded_path, data, {"Content-Type" => data ? "application/json" : "text/plain", "Authorization" => "OAuth #{self.oauth_token}"}.merge(headers))
+        https_request.send_request("PATCH", encoded_path, data, common_headers(headers, {"Content-Type" => data ? "application/json" : "text/plain"}))
       end
     end
 
@@ -327,7 +327,7 @@ module Databasedotcom
     # Returns the HTTPResult if it is of type HTTPSuccess- raises SalesForceError otherwise.
     def http_multipart_post(path, parts, parameters={}, headers={})
       with_encoded_path_and_checked_response(path, parameters) do |encoded_path|
-        https_request.request(Net::HTTP::Post::Multipart.new(encoded_path, parts, {"Authorization" => "OAuth #{self.oauth_token}"}.merge(headers)))
+        https_request.request(Net::HTTP::Post::Multipart.new(encoded_path, parts, common_headers(headers)))
       end
     end
 
@@ -349,7 +349,7 @@ module Databasedotcom
     end
 
     def ensure_expected_response(expected_result_class)
-      response = yield
+      response = decompress(yield)
 
       unless response.is_a?(expected_result_class || Net::HTTPSuccess)
         if response.is_a?(Net::HTTPUnauthorized)
@@ -551,6 +551,27 @@ module Databasedotcom
     def const_defined_in_module(mod, const)
       mod.method(:const_defined?).arity == 1 ? mod.const_defined?(const) : mod.const_defined?(const, false)
     end
+    
+    def common_headers(*additional_headers)
+      base_headers = {"Authorization" => "OAuth #{self.oauth_token}", "Accept-Encoding" => "gzip"}  #
+      additional_headers.each{|h| base_headers.merge!(h)} if additional_headers
+      base_headers
+    end
 
+    def decompress(result)
+      if result['content-encoding'] == 'gzip'
+        begin
+          original_size = result.body.length
+          i = Zlib::GzipReader.new(StringIO.new(result.body))
+          result.instance_variable_set(:@body, i.read)
+          #puts "Result body was compressed #{100.0*(result.body.length - original_size)/result.body.length}%"
+        rescue Zlib::GzipFile::Error
+         end
+      end
+      result
+    end
+    
   end
+  
+  
 end

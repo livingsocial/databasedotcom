@@ -1,6 +1,7 @@
 require 'rspec'
 require 'spec_helper'
 require 'databasedotcom'
+require 'zlib'
 
 describe Databasedotcom::Client do
 
@@ -1043,13 +1044,19 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:get, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 200)
+        @client.http_get("/my/path")
+        WebMock.should have_requested(:get, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
           @client.http_get("/my/path", nil, {"Something" => "Header"})
         }.should raise_error(Databasedotcom::SalesForceError)
       end
-
+      
       it_should_behave_like "a request that can refresh the oauth token", :get, "get", "https://na1.salesforce.com/my/path", 200
 
       it "handles paths !> MAX_PATH_LENGTH" do
@@ -1062,6 +1069,21 @@ describe Databasedotcom::Client do
         path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
         lambda { @client.http_get(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
       end
+
+      it "handles an unencrypted body" do
+        body = "test body"
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => body, :status => 200)
+        result = @client.http_get("/my/path")
+        result.body.should == body
+      end
+
+      it "handles an encrypted body" do
+        body = "test body"
+        stub_request(:get, "https://na1.salesforce.com/my/path").to_return(:body => gzipped_string(body), :status => 200, :headers => {"Content-Encoding" => 'gzip'})
+        result = @client.http_get("/my/path")
+        result.body.should == body
+      end
+
     end
 
     describe "#http_delete" do
@@ -1083,6 +1105,12 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:delete, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:delete, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 204)
+        @client.http_delete("/my/path")
+        WebMock.should have_requested(:delete, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:delete, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
@@ -1101,6 +1129,20 @@ describe Databasedotcom::Client do
       it "raises MaxPathLengthError for paths > MAX_PATH_LENGTH" do
         path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
         lambda { @client.http_delete(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
+      end
+      
+      it "handles an unencrypted body" do
+        body = "test body"
+        stub_request(:delete, "https://na1.salesforce.com/my/path").to_return(:body => body, :status => 204)
+        result = @client.http_delete("/my/path")
+        result.body.should == body
+      end
+
+      it "handles an encrypted body" do
+        body = "test body"
+        stub_request(:delete, "https://na1.salesforce.com/my/path").to_return(:body => gzipped_string(body), :status => 204, :headers => {"Content-Encoding" => 'gzip'})
+        result = @client.http_delete("/my/path")
+        result.body.should == body
       end
     end
 
@@ -1123,6 +1165,12 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 201)
+        @client.http_post("/my/path")
+        WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
@@ -1141,6 +1189,20 @@ describe Databasedotcom::Client do
       it "raises MaxPathLengthError for paths > MAX_PATH_LENGTH" do
         path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH]
         lambda { @client.http_post(path, nil, {}) }.should raise_error(Databasedotcom::MaxPathLengthError)
+      end
+
+      it "handles an unencrypted body" do
+        body = "test body"
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => body, :status => 201)
+        result = @client.http_post("/my/path", "data", nil, {"Something" => "Header"})
+        result.body.should == body
+      end
+
+      it "handles an encrypted body" do
+        body = "test body"
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => gzipped_string(body), :status => 201, :headers => {"Content-Encoding" => 'gzip'})
+        result = @client.http_post("/my/path", "data", nil, {"Something" => "Header"})
+        result.body.should == body
       end
 
     end
@@ -1164,6 +1226,12 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 201)
+        @client.http_multipart_post("/my/path", {}, {}, {"Something" => "Header"})
+        WebMock.should have_requested(:post, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
@@ -1182,6 +1250,20 @@ describe Databasedotcom::Client do
         path = ('/' + ('x' * MAX_PATH_LENGTH))[0..MAX_PATH_LENGTH-1]
         stub_request(:post, "https://na1.salesforce.com#{path}").to_return(:body => '', :status => 201)
         @client.http_multipart_post(path, {}, {}, {"Something" => "Header"})
+      end
+
+      it "handles an unencrypted body" do
+        body = "test body"
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => body, :status => 201)
+        result = @client.http_multipart_post("/my/path", {}, {}, {"Something" => "Header"})
+        result.body.should == body
+      end
+
+      it "handles an encrypted body" do
+        body = "test body"
+        stub_request(:post, "https://na1.salesforce.com/my/path").to_return(:body => gzipped_string(body), :status => 201, :headers => {"Content-Encoding" => 'gzip'})
+        result = @client.http_multipart_post("/my/path", {}, {}, {"Something" => "Header"})
+        result.body.should == body
       end
     end
 
@@ -1204,6 +1286,12 @@ describe Databasedotcom::Client do
         WebMock.should have_requested(:patch, "https://na1.salesforce.com/my/path").with(:headers => {"Something" => "Header"})
       end
 
+      it "includes an Accepts-Encoding=GZIP header" do
+        stub_request(:patch, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 201)
+        @client.http_patch("/my/path", "data", nil, {"Something" => "Header"})
+        WebMock.should have_requested(:patch, "https://na1.salesforce.com/my/path").with(:headers => {'Accept-Encoding'=>'gzip'})
+      end
+
       it "raises SalesForceError" do
         stub_request(:patch, "https://na1.salesforce.com/my/path").to_return(:body => "", :status => 400)
         lambda {
@@ -1221,7 +1309,29 @@ describe Databasedotcom::Client do
         stub_request(:patch, "https://na1.salesforce.com#{path}").to_return(:body => '', :status => 201)
         @client.http_patch(path, nil, {})
       end
+      
+      it "handles an unencrypted body" do
+        body = "test body"
+        stub_request(:patch, "https://na1.salesforce.com/my/path").to_return(:body => body, :status => 201)
+        result = @client.http_patch("/my/path", "data", nil, {"Something" => "Header"})
+        result.body.should == body
+      end
+
+      it "handles an encrypted body" do
+        body = "test body"
+        stub_request(:patch, "https://na1.salesforce.com/my/path").to_return(:body => gzipped_string(body), :status => 201, :headers => {"Content-Encoding" => 'gzip'})
+        result = @client.http_patch("/my/path", "data", nil, {"Something" => "Header"})
+        result.body.should == body
+      end     
 
     end
   end
+end
+
+def gzipped_string(str)
+  s = StringIO.new
+  gz = Zlib::GzipWriter.new(s)
+  gz.write(str)
+  gz.close
+  s.string
 end
