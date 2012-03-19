@@ -1,4 +1,4 @@
-module Databasedotcom
+module Databasedotcom  
   # An exception raised when any non successful request is made to Force.com.
   class SalesForceError < StandardError
     # the Net::HTTPResponse from the API call
