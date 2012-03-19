@@ -543,5 +543,6 @@ module Databasedotcom
     def const_defined_in_module(mod, const)
       mod.method(:const_defined?).arity == 1 ? mod.const_defined?(const) : mod.const_defined?(const, false)
     end
+
   end
 end
