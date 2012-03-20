@@ -1,8 +1,22 @@
 module Databasedotcom
+  
+  # Sometimes you don't want all of the SObjects or SObject fields. One vexing situation is an
+  # SObject that has a huge number of fields because a query on that object can exceed the
+  # maximum number of characters allowed in the URL path (8192). This produces a 500 error that
+  # is quite difficult to understand. The solution is to remove some of the fields from the
+  # SObject so the query URL is less than the 8192 character limit.
+  #
+  # You can effectively hide entire SObjects or individual fields via the blacklist. Create a hash
+  # with keys 'classes' and/or 'fields' and specify the classes (as an array) and fields (as a hash of 
+  # class / fieldname array pairs) to be excluded. 
+  #
+  #    my_blacklist = {'classes' => ['Account', 'Case'], 'fields' => {'Opportunity' => ['name']}}
+  #    Databasedotcom::Blacklist.blacklist = my_blacklist
   class Blacklist
     @blacklist = {'classes' => [], 'fields' => {}}
     
-    # Specify blacklisted class and field names in a hash.
+    # Specify blacklisted class and field names in a hash. The 'class' keypair should contain an array
+    # of SObject names and the 'fields' keypair should contain a hash of class name & field array keypairs.
     #    my.blacklist = {'classes' => ['Account', 'Case'], 'fields' => {'Opportunity' => ['field1', 'field2']}}
     def self.blacklist=(blacklist_hash)
       @blacklist = blacklist_hash || {}
@@ -40,7 +54,7 @@ module Databasedotcom
   end
   
   # Wrap the DESCRIBE_SOBJECT and DESCRIBE_SOBJECTS methods with the blacklist filter so
-  # we never know about fields that are blacklisted.
+  # we never know about classes and/or fields that are blacklisted.
   class Client
     def describe_sobjects_with_filter
       describe_sobjects_without_filter.collect do |sobject|
