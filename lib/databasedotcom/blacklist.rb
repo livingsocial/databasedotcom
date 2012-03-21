@@ -14,6 +14,8 @@ module Databasedotcom
   #    Databasedotcom::Blacklist.blacklist = my_blacklist
   class Blacklist
     
+    @blacklist = {'classes' => [], 'fields' => {}}
+    
     # Specify blacklisted class and field names in a hash. The 'class' keypair should contain an array
     # of SObject names and the 'fields' keypair should contain a hash of class name & field array keypairs.
     #    my.blacklist = {'classes' => ['Account', 'Case'], 'fields' => {'Opportunity' => ['field1', 'field2']}}

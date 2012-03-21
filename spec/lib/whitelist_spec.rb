@@ -4,6 +4,9 @@ require 'databasedotcom'
 require 'databasedotcom/whitelist'
 
 describe Databasedotcom::Whitelist do
+  before do
+    Databasedotcom::Blacklist.instance_variable_set(:@blacklist, {'classes' => [], 'fields' => {}})
+  end
   
   describe '#allow_field?(field)' do
     before do
@@ -50,10 +53,6 @@ describe Databasedotcom::Whitelist do
         Databasedotcom::Whitelist.filter_description!(@description_hash, @fake_class_name)
         @description_hash['fields'].include?({'name'=>'one'}).should be_false
         @description_hash['fields'].include?({'name'=>'three'}).should be_false
-      end
-      it 'should add a BLACKLISTED_FIELDS keypair' do
-        Databasedotcom::Whitelist.filter_description!(@description_hash, @fake_class_name)
-        @description_hash['whitelisted_fields'].include?({'name'=>'two'}).should be_false
       end
     end
     it 'should not change other keypairs' do

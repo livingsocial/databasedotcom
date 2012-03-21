@@ -17,6 +17,7 @@ module Databasedotcom
   class Whitelist
     
     @whitelist = {'classes' => [], 'fields' => {}}
+    
     # Specify whitelisted class and field names in a hash. The 'class' keypair should contain an array
     # of SObject names and the 'fields' keypair should contain a hash of class name & field array keypairs.
     #    my.whitelist = {'classes' => ['Account', 'Case'], 'fields' => {'Opportunity' => ['field1', 'field2']}}
