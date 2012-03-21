@@ -18,7 +18,7 @@ describe Databasedotcom::Blacklist do
       Databasedotcom::Blacklist.allow_field?(fake_class_name, :foo).should be_true
       
       Databasedotcom::Blacklist.blacklist = {'fields' => {fake_class_name => [:foo]}}
-      Databasedotcom::Blacklist.allow_field?(fake_class_name, :foo).should_not be_true
+      Databasedotcom::Blacklist.allow_field?(fake_class_name, :foo).should be_false
     end
   end
   
@@ -62,37 +62,34 @@ describe Databasedotcom::Client do
   before do
     @client = Databasedotcom::Client.new
   end
-  describe '#describe_sobjects_with_filter' do
+  describe '#describe_blacklist_sobjects_with_filter' do
     it 'should filter SObjects descriptions using the blacklist' do
-      @client.should_receive(:describe_sobjects_without_filter) { [{'description'=>1, 'name'=>2}] }
-      Databasedotcom::Blacklist.should_receive(:filter_description!).with(1,2)
+      @client.should_receive(:describe_blacklist_sobjects_without_filter) { [{'description'=>'1', 'name'=>'2'}] }
+      Databasedotcom::Blacklist.should_receive(:filter_description!).with('1','2')
       @client.describe_sobjects
     end
     it 'should return the sobjects' do
-      sobjects = [
-        {'description'=>1, 'name'=>2},
-        {'description'=>3, 'name'=>4},
-        {'description'=>5, 'name'=>6},
-      ]
-      @client.should_receive(:describe_sobjects_without_filter) { sobjects }
+      sobjects = [{'description'=>'1', 'name'=>'2'}]
+      @client.should_receive(:describe_blacklist_sobjects_without_filter) { sobjects }
       Databasedotcom::Blacklist.stub(:filter_description!)
       @client.describe_sobjects.should == sobjects
     end
   end
   
   it 'should filter an SObject description fields using the blacklist' do
-    description = mock()
+    description = {'fields' => []}
     class_name = 'fake_class_name'
-    @client.should_receive(:describe_sobject_without_filter).with(class_name) { description }
+    @client.should_receive(:describe_blacklist_sobject_without_filter).with(class_name) { description }
     Databasedotcom::Blacklist.should_receive(:filter_description!).with(description, class_name)
     @client.describe_sobject(class_name).should == description
   end
   
   it 'should filter #list_sobjects using the blacklist' do
     sobjects = [1,2,3]
-    @client.should_receive(:list_sobjects_without_filter) { sobjects }
-    Databasedotcom::Blacklist.should_receive(:filter_sobjects).once { sobjects } #.with(:list_sobjects_without_filter)
-    @client.list_sobjects.should == sobjects
+    filtered_sobjects = [5,6]
+    @client.should_receive(:list_blacklist_sobjects_without_filter) { sobjects }
+    Databasedotcom::Blacklist.should_receive(:filter_sobjects).once { filtered_sobjects } #.with(:list_sobjects_without_filter)
+    @client.list_sobjects.should == filtered_sobjects
   end
 
 end

@@ -55,28 +55,28 @@ module Databasedotcom
   # Wrap the DESCRIBE_SOBJECT and DESCRIBE_SOBJECTS methods with the blacklist filter so
   # we never know about classes and/or fields that are blacklisted.
   class Client
-    def describe_sobjects_with_filter
-      describe_sobjects_without_filter.collect do |sobject|
+    def describe_blacklist_sobjects_with_filter
+      describe_blacklist_sobjects_without_filter.collect do |sobject|
         Databasedotcom::Blacklist.filter_description!(sobject['description'], sobject['name'])
         sobject
       end
     end
-    alias_method :describe_sobjects_without_filter, :describe_sobjects
-    alias_method :describe_sobjects, :describe_sobjects_with_filter
+    alias_method :describe_blacklist_sobjects_without_filter, :describe_sobjects
+    alias_method :describe_sobjects, :describe_blacklist_sobjects_with_filter
 
-    def describe_sobject_with_filter(class_name)
-      description = describe_sobject_without_filter(class_name)
+    def describe_blacklist_sobject_with_filter(class_name)
+      description = describe_blacklist_sobject_without_filter(class_name)
       Databasedotcom::Blacklist.filter_description!(description, class_name)
       description
     end
-    alias_method :describe_sobject_without_filter, :describe_sobject
-    alias_method :describe_sobject, :describe_sobject_with_filter
+    alias_method :describe_blacklist_sobject_without_filter, :describe_sobject
+    alias_method :describe_sobject, :describe_blacklist_sobject_with_filter
 
-    def list_sobjects_with_filter
-      Databasedotcom::Blacklist.filter_sobjects(list_sobjects_without_filter)
+    def list_blacklist_sobjects_with_filter
+      Databasedotcom::Blacklist.filter_sobjects(list_blacklist_sobjects_without_filter)
     end
-    alias_method :list_sobjects_without_filter, :list_sobjects
-    alias_method :list_sobjects, :list_sobjects_with_filter
+    alias_method :list_blacklist_sobjects_without_filter, :list_sobjects
+    alias_method :list_sobjects, :list_blacklist_sobjects_with_filter
 
   end
   
