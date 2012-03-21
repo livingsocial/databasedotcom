@@ -30,7 +30,6 @@ module Databasedotcom
     # fields are removed, Databasedotcom will not know about them or use them.
     def self.filter_description!(description, class_name)
       if description && description['fields']
-        description['whitelisted_fields'] = description['fields'].select{|f| !allow_field?(class_name, f['name'])}
         description['fields'] = description['fields'].select{|f| allow_field?(class_name, f['name'])}
       end
     end
