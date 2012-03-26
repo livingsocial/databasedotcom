@@ -32,6 +32,7 @@ module Databasedotcom
     def self.filter_description!(description, class_name)
       if description && description['fields']
         description['fields'] = description['fields'].select{|f| allow_field?(class_name, f['name'])}
+        raise Databasedotcom::NoFieldsError.new(class_name) unless description['fields'].length > 0
       end
     end
     

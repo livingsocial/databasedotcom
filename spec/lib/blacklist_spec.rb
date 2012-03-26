@@ -5,6 +5,30 @@ require 'databasedotcom/blacklist'
 
 describe Databasedotcom::Blacklist do
   
+  describe '#blacklist=' do
+    before do
+      @bl = Databasedotcom::Blacklist
+    end
+    it 'should assign classes' do      
+      @bl.blacklist = {'classes' => [1]}
+      @bl.instance_variable_get(:@blacklist)['classes'].should == [1]
+    end
+    it 'should assign fields' do
+      @bl.blacklist = {'fields' => {'class_name' => [:fields]}}
+      @bl.instance_variable_get(:@blacklist)['fields'].should == {'class_name' => [:fields]}
+    end
+    it 'should initialize classes' do
+      raw_class = Databasedotcom::Blacklist.dup
+      raw_class.blacklist = nil
+      raw_class.instance_variable_get(:@blacklist).keys.should include('classes')
+    end
+    it 'should initialize fields' do
+      raw_class = Databasedotcom::Blacklist.dup
+      raw_class.blacklist = nil
+      raw_class.instance_variable_get(:@blacklist).keys.should include('fields')
+    end
+  end
+  
   describe '#allow_field?(field)' do
     it 'should indicate if a field is allowed/included' do
       fake_class_name = 'FakeClassName'
@@ -77,7 +101,7 @@ describe Databasedotcom::Client do
   end
   
   it 'should filter an SObject description fields using the blacklist' do
-    description = {'fields' => []}
+    description = {'fields' => ['fake_field']}
     class_name = 'fake_class_name'
     @client.should_receive(:describe_blacklist_sobject_without_filter).with(class_name) { description }
     Databasedotcom::Blacklist.should_receive(:filter_description!).with(description, class_name)

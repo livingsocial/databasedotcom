@@ -7,5 +7,12 @@ module Databasedotcom
       super(message)
     end
   end
-    
+  
+  class NoFieldsError < StandardError
+    def initialize(class_name)
+      message = "SObject '#{class_name}' has no fields in its description, probably because the blacklist and / or whitelist are configured incorrectly"
+      super(message)
+    end
+  end
+  
 end

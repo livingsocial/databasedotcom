@@ -8,6 +8,30 @@ describe Databasedotcom::Whitelist do
     Databasedotcom::Blacklist.instance_variable_set(:@blacklist, {'classes' => [], 'fields' => {}})
   end
   
+  describe '#whitelist=' do
+    before do
+      @wl = Databasedotcom::Whitelist
+    end
+    it 'should assign classes' do      
+      @wl.whitelist = {'classes' => [1]}
+      @wl.instance_variable_get(:@whitelist)['classes'].should == [1]
+    end
+    it 'should assign fields' do
+      @wl.whitelist = {'fields' => {'class_name' => [:fields]}}
+      @wl.instance_variable_get(:@whitelist)['fields'].should == {'class_name' => [:fields]}
+    end
+    it 'should initialize classes' do
+      raw_class = Databasedotcom::Whitelist.dup
+      raw_class.whitelist = nil
+      raw_class.instance_variable_get(:@whitelist).keys.should include('classes')
+    end
+    it 'should initialize fields' do
+      raw_class = Databasedotcom::Whitelist.dup
+      raw_class.whitelist = nil
+      raw_class.instance_variable_get(:@whitelist).keys.should include('fields')
+    end
+  end
+    
   describe '#allow_field?(field)' do
     before do
       @fake_class_name = 'FakeClassName'
