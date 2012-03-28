@@ -22,6 +22,13 @@ module Databasedotcom
     # of SObject names and the 'fields' keypair should contain a hash of class name & field array keypairs.
     #    my.whitelist = {'classes' => ['Account', 'Case'], 'fields' => {'Opportunity' => ['field1', 'field2']}}
     def self.whitelist=(whitelist_hash)
+      if whitelist_hash
+        if (whitelist_hash['fields'].nil? && whitelist_hash['classes'].nil?)
+          warn 'WARNING: The whitelist hash must contain at least a "fields" or "classes" keypair.'
+        elsif (whitelist_hash.keys - ['fields', 'classes']).present?
+          warn 'WARNING: The whitelist hash only accepts keys "fields" and "classes", all other keys are ignored.'
+        end
+      end
       @whitelist = whitelist_hash || {}
       @whitelist['fields'] ||= {}
       @whitelist['classes'] ||= []
