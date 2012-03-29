@@ -30,6 +30,20 @@ describe Databasedotcom::Whitelist do
       raw_class.whitelist = nil
       raw_class.instance_variable_get(:@whitelist).keys.should include('fields')
     end
+    it 'should not warn if only keys "fields" and "classes" are present' do
+      @wl.should_not_receive(:warn)
+      @wl.whitelist = {'classes' => [1]}
+      @wl.whitelist = {'fields' => {'class1' => [:fields]}}
+      @wl.whitelist = {'classes' => [1],'fields' => {'class1' => [:fields]}}
+    end
+    it 'should warn if keys "fields" and "classes" are missing' do
+      @wl.should_receive(:warn)
+      @wl.whitelist = {}
+    end
+    it 'should warn if keys other than "fields" and "classes" are present' do
+      @wl.should_receive(:warn)
+      @wl.whitelist = {'classes' => [1], 'bad_field' => 1}
+    end
   end
     
   describe '#allow_field?(field)' do

@@ -343,13 +343,13 @@ module Databasedotcom
 
     def with_logging(encoded_path, options)
       log_request(encoded_path, options)
-      response = yield encoded_path
+      response = decompress(yield encoded_path)
       log_response(response)
       response
     end
 
     def ensure_expected_response(expected_result_class)
-      response = decompress(yield)
+      response = yield
 
       unless response.is_a?(expected_result_class || Net::HTTPSuccess)
         if response.is_a?(Net::HTTPUnauthorized)

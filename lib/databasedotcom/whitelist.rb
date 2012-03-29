@@ -25,7 +25,7 @@ module Databasedotcom
       if whitelist_hash
         if (whitelist_hash['fields'].nil? && whitelist_hash['classes'].nil?)
           warn 'WARNING: The whitelist hash must contain at least a "fields" or "classes" keypair.'
-        elsif (whitelist_hash.keys - ['fields', 'classes']).present?
+        elsif (whitelist_hash.keys - ['fields', 'classes']).length != 0
           warn 'WARNING: The whitelist hash only accepts keys "fields" and "classes", all other keys are ignored.'
         end
       end
