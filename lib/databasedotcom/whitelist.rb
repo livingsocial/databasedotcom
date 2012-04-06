@@ -38,7 +38,10 @@ module Databasedotcom
     # fields are removed, Databasedotcom will not know about them or use them.
     def self.filter_description!(description, class_name)
       if description && description['fields']
-        description['fields'] = description['fields'].select{|f| allow_field?(class_name, f['name'])}
+        all_fields = description['fields']
+        description['fields'] = all_fields.select{|f| allow_field?(class_name, f['name'])}
+        description['filtered_fields'] ||= []
+        description['filtered_fields'] += all_fields.select{|f| allow_field?(class_name, f['name'])}
         raise Databasedotcom::NoFieldsError.new(class_name) unless description['fields'].length > 0
       end
     end

@@ -67,9 +67,9 @@ describe Databasedotcom::Blacklist do
         @description_hash['fields'].include?({'name'=>'one'}).should be_true
         @description_hash['fields'].include?({'name'=>'three'}).should be_true
       end
-      it 'should add a BLACKLISTED_FIELDS keypair' do
+      it 'should add a FILTERED_FIELDS keypair with filtered fields' do
         Databasedotcom::Blacklist.filter_description!(@description_hash, @fake_class_name)
-        @description_hash['blacklisted_fields'].include?({'name'=>'two'}).should be_true
+        @description_hash['filtered_fields'].include?({'name'=>'two'}).should be_true
       end
     end
     it 'should not change other keypairs' do

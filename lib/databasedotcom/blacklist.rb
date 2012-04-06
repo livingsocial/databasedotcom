@@ -15,7 +15,7 @@ module Databasedotcom
   class Blacklist
     
     @blacklist = {'classes' => [], 'fields' => {}}
-    
+
     # Specify blacklisted class and field names in a hash. The 'class' keypair should contain an array
     # of SObject names and the 'fields' keypair should contain a hash of class name & field array keypairs.
     #    my.blacklist = {'classes' => ['Account', 'Case'], 'fields' => {'Opportunity' => ['field1', 'field2']}}
@@ -29,8 +29,10 @@ module Databasedotcom
     # fields are removed, Databasedotcom will not know about them or use them.
     def self.filter_description!(description, class_name)
       if description && description['fields']
-        description['blacklisted_fields'] = description['fields'].select{|f| !allow_field?(class_name, f['name'])}
-        description['fields'] = description['fields'].select{|f| allow_field?(class_name, f['name'])}
+        all_fields = description['fields']
+        description['fields'] = all_fields.select{|f| allow_field?(class_name, f['name'])}
+        description['filtered_fields'] ||= []
+        description['filtered_fields'] += all_fields.select{|f| !allow_field?(class_name, f['name'])}
       end
     end
     

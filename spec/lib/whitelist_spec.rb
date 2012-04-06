@@ -92,6 +92,10 @@ describe Databasedotcom::Whitelist do
         @description_hash['fields'].include?({'name'=>'one'}).should be_false
         @description_hash['fields'].include?({'name'=>'three'}).should be_false
       end
+      it 'should add a FILTERED_FIELDS keypair with filtered fields' do
+        Databasedotcom::Whitelist.filter_description!(@description_hash, @fake_class_name)
+        @description_hash['filtered_fields'].include?({'name'=>'two'}).should be_true
+      end
     end
     it 'should not change other keypairs' do
       description_hash = {:a => 1, :b => 2}
