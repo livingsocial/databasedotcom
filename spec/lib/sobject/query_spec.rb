@@ -4,13 +4,19 @@ require 'databasedotcom'
 
 COMPONENTS = %w(select from where limit order_by)
 
-class TestClassQueryQuery < Databasedotcom::Sobject::Query
+class TestSobject < Databasedotcom::Sobject::Sobject
+  def self.field_list
+    'field1, field2, field3'
+  end
+  def self.sobject_name
+    'TestSobject'
+  end
 end
 
-describe Databasedotcom::Sobject::Query do
-  describe Databasedotcom::Sobject::Query do
+describe Databasedotcom::Sobject::QueryComponents do
+  describe Databasedotcom::Sobject::QueryComponents do
     before do
-      @query = Databasedotcom::Sobject::Query.new
+      @query = Databasedotcom::Sobject::QueryComponents.new
     end
 
     it 'should add setter functions for each query component' do
