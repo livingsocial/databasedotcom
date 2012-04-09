@@ -178,9 +178,7 @@ module Databasedotcom
         end
         
         self.cattr_accessor :sql_query 
-        self.sql_query = Databasedotcom::Sobject::Query.new(self.sobject_name, self.field_list)
-
-        
+        self.sql_query = Databasedotcom::Sobject::Query.new({'select' => self.field_list, 'from' => self.sobject_name})
       end
 
       # Returns the Force.com type of the attribute +attr_name+. Raises ArgumentError if attribute does not exist.
