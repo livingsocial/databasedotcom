@@ -145,6 +145,11 @@ module Databasedotcom
         raise ArgumentError.new("No attribute named #{attr_name}") unless self.class.attributes.include?(attr_name)
         self.send("#{attr_name}=", value)
       end
+      
+      # Initialize a query object with information about this SObject
+      def self.soql_query
+        Databasedotcom::Sobject::Query.new({'select' => self.field_list, 'from' => self.sobject_name})
+      end
 
       # Returns an Array of attribute names that this Sobject has.
       #
@@ -177,8 +182,6 @@ module Databasedotcom
 
         end
         
-        self.cattr_accessor :sql_query 
-        self.sql_query = Databasedotcom::Sobject::Query.new({'select' => self.field_list, 'from' => self.sobject_name})
       end
 
       # Returns the Force.com type of the attribute +attr_name+. Raises ArgumentError if attribute does not exist.
@@ -222,8 +225,7 @@ module Databasedotcom
       #    client.materialize("Car")
       #    Car.all    #=>   [#<Car @Id="1", ...>, #<Car @Id="2", ...>, #<Car @Id="3", ...>, ...]
       def self.all
-        #self.client.query("SELECT #{self.field_list} FROM #{self.sobject_name}")
-        self.client.query( sql_query.to_s )
+        self.client.query( soql_query.to_s )
       end
 
       # Returns a collection of instances of self that match the conditional +where_expr+, which is the WHERE part of a SOQL query.
@@ -231,8 +233,7 @@ module Databasedotcom
       #    client.materialize("Car")
       #    Car.query("Color = 'Blue'")    #=>   [#<Car @Id="1", @Color="Blue", ...>, #<Car @Id="5", @Color="Blue", ...>, ...]
       def self.query(where_expr)
-        #self.client.query("SELECT #{self.field_list} FROM #{self.sobject_name} WHERE #{where_expr}")        
-        self.client.query(sql_query.where(where_expr).to_s)
+        self.client.query(soql_query.where(where_expr).to_s)
       end
       
       # Delegates to Client.search
@@ -242,16 +243,12 @@ module Databasedotcom
 
       # Find the first record. If the +where_expr+ argument is present, it must be the WHERE part of a SOQL query
       def self.first(where_expr=nil)
-        #where = where_expr ? "WHERE #{where_expr} " : ""
-        #self.client.query("SELECT #{self.field_list} FROM #{self.sobject_name} #{where}ORDER BY Id ASC LIMIT 1").first
-        self.client.query( sql_query.where(where_expr).order_by('ASC').limit(1).to_s ).first
+        self.client.query( soql_query.where(where_expr).order_by('Id ASC').limit(1).to_s ).first
       end
 
       # Find the last record. If the +where_expr+ argument is present, it must be the WHERE part of a SOQL query
       def self.last(where_expr=nil)
-        #where = where_expr ? "WHERE #{where_expr} " : ""
-        #self.client.query("SELECT #{self.field_list} FROM #{self.sobject_name} #{where}ORDER BY Id DESC LIMIT 1").first
-        self.client.query( sql_query.where(where_expr).order_by('DESC').limit(1).to_s ).last
+        self.client.query( soql_query.where(where_expr).order_by('Id DESC').limit(1).to_s ).last
       end
 
       #Delegates to Client.upsert with arguments self, +field+, +values+, and +attrs+
@@ -266,8 +263,7 @@ module Databasedotcom
 
       # Get the total number of records
       def self.count
-        #self.client.query("SELECT COUNT() FROM #{self.sobject_name}").total_size
-        self.client.query( sql_query.select('COUNT()').to_s ).total_size
+        self.client.query( soql_query.select('COUNT()').to_s ).total_size
       end
 
       # Sobject objects support dynamic finders similar to ActiveRecord.

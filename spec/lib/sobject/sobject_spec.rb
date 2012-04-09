@@ -2,9 +2,10 @@ require 'rspec'
 require 'spec_helper'
 require 'databasedotcom'
 
+class TestClass < Databasedotcom::Sobject::Sobject
+end
+
 describe Databasedotcom::Sobject::Sobject do
-  class TestClass < Databasedotcom::Sobject::Sobject
-  end
 
   before do
     @client = Databasedotcom::Client.new(File.join(File.dirname(__FILE__), "../../fixtures/databasedotcom.yml"))
