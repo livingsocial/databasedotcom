@@ -158,7 +158,7 @@ describe Databasedotcom::Sobject::Sobject do
     describe ".query" do
       it "constructs and submits a SOQL query" do
         @client.should_receive(:query).with("SELECT #{@field_names.join(',')} FROM TestClass WHERE Name = 'foo'").and_return("bar")
-        TestClass.query("Name = 'foo'", true).should == "bar"
+        TestClass.query("Name = 'foo'").should == "bar"
       end
     end
 
