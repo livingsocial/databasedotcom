@@ -1,4 +1,4 @@
-require 'databasedotcom/sobject/query'
+require 'databasedotcom/sobject/query_service'
 
 module Databasedotcom
   module Sobject
@@ -215,9 +215,9 @@ module Databasedotcom
         self.client.find(self, record_id)
       end
 
-      # Initialize a query object with information about this SObject
+      # Set up a query with information about this SObject
       def self.soql_query
-        Databasedotcom::Sobject::Query.new(self)
+        Databasedotcom::Sobject::QueryService.new(self)
       end
 
       # Returns all records of type self as instances.
@@ -263,7 +263,7 @@ module Databasedotcom
 
       # Get the total number of records
       def self.count
-        soql_query.select('COUNT()').all.total_size
+        soql_query.selects('COUNT()').all.total_size
       end
 
       # Sobject objects support dynamic finders similar to ActiveRecord.
